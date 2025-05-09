@@ -1,0 +1,143 @@
+#!/bin/bash
+#
+# Utilities for manipulating the cortex network.
+
+FREECOG_SUBJ=$1
+FREECOG_DIR_FS=$FREESURFER_HOME
+FREECOG_DIR_SUBJ=$SUBJECTS_DIR
+
+FREECOG_DIR_MRI="$FREECOG_DIR_SUBJ/$FREECOG_SUBJ/mri"
+FREECOG_DIR_CT="$FREECOG_DIR_SUBJ/$FREECOG_SUBJ/CT"
+FREECOG_DIR_ACPC="$FREECOG_DIR_SUBJ/$FREECOG_SUBJ/acpc"
+FREECOG_DIR_DICOM="$FREECOG_DIR_SUBJ/$FREECOG_SUBJ/dicom"
+FREECOG_DIR_ELECS="$FREECOG_DIR_SUBJ/$FREECOG_SUBJ/elecs"
+FREECOG_DIR_MESHES="$FREECOG_DIR_SUBJ/$FREECOG_SUBJ/Meshes"
+FREECOG_DIR_LABELS="$FREECOG_DIR_SUBJ/$FREECOG_SUBJ/label"
+FREECOG_DIR_SURF="$FREECOG_DIR_SUBJ/$FREECOG_SUBJ/surf"
+FREECOG_DIR_ASCII="$FREECOG_DIR_SUBJ/$FREECOG_SUBJ/ascii"
+
+FREECOG_DIR_ORIG="$FREECOG_DIR_MRI/orig"
+FREECOG_DIR_GYRI="$FREECOG_DIR_LABELS/gyri"
+FREECOG_DIR_SUBCORT="$FREECOG_DIR_MESHES/subcort"
+FREECOG_DIR_ELECS_INDIVIDUAL="$FREECOG_DIR_ELECS/individual_elecs"
+
+FREECOG_FILE_T1_ACPC_NII="$FREECOG_DIR_ACPC/T1.nii"
+FREECOG_FILE_T1_ORIG_NII="$FREECOG_DIR_ORIG/T1.nii"
+FREECOG_FILE_T1_ORIG_MGZ="$FREECOG_DIR_ORIG/001.mgz"
+FREECOG_FILE_T1_BRAIN_MGZ="$FREECOG_DIR_MRI/brain.mgz"
+FREECOG_FILE_T1_ORIG_MGZ="$FREECOG_DIR_MRI/orig.mgz"
+FREECOG_FILE_T1_ASEG_MGZ="$FREECOG_DIR_MRI/aparc+aseg.mgz"
+
+FREECOG_FILE_CT_NII="$FREECOG_DIR_CT/CT.nii"
+FREECOG_FILE_CT_REG_NII="$FREECOG_DIR_CT/rCT.nii"
+
+FREECOG_FILE_SURF_PIAL_LH="$FREECOG_DIR_SURF/lh.pial"
+FREECOG_FILE_SURF_PIAL_RH="$FREECOG_DIR_SURF/rh.pial"
+FREECOG_FILE_SURF_WHITE_LH="$FREECOG_DIR_SURF/lh.white"
+FREECOG_FILE_SURF_WHITE_RH="$FREECOG_DIR_SURF/rh.white"
+FREECOG_FILE_SURF_INFLATED_LH="$FREECOG_DIR_SURF/lh.inflated"
+FREECOG_FILE_SURF_INFLATED_RH="$FREECOG_DIR_SURF/rh.inflated"
+
+FREECOG_FILE_MESH_PIAL_LH="$FREECOG_DIR_MESHES/lh_pial_trivert.mat"
+FREECOG_FILE_MESH_PIAL_RH="$FREECOG_DIR_MESHES/rh_pial_trivert.mat"
+FREECOG_FILE_MESH_WHITE_LH="$FREECOG_DIR_MESHES/lh_white_trivert.mat"
+FREECOG_FILE_MESH_WHITE_RH="$FREECOG_DIR_MESHES/rh_white_trivert.mat"
+FREECOG_FILE_MESH_INFLATED_LH="$FREECOG_DIR_MESHES/lh_inflated_trivert.mat"
+FREECOG_FILE_MESH_INFLATED_RH="$FREECOG_DIR_MESHES/rh_inflated_trivert.mat"
+
+FREECOG_FILE_MESH_STRUCT_PIAL_LH="$FREECOG_DIR_MESHES/${FREECOG_SUBJ}_lh_pial.mat"
+FREECOG_FILE_MESH_STRUCT_PIAL_RH="$FREECOG_DIR_MESHES/${FREECOG_SUBJ}_rh_pial.mat"
+FREECOG_FILE_MESH_STRUCT_WHITE_LH="$FREECOG_DIR_MESHES/${FREECOG_SUBJ}_lh_white.mat"
+FREECOG_FILE_MESH_STRUCT_WHITE_RH="$FREECOG_DIR_MESHES/${FREECOG_SUBJ}_rh_white.mat"
+FREECOG_FILE_MESH_STRUCT_INFLATED_LH="$FREECOG_DIR_MESHES/${FREECOG_SUBJ}_lh_inflated.mat"
+FREECOG_FILE_MESH_STRUCT_INFLATED_RH="$FREECOG_DIR_MESHES/${FREECOG_SUBJ}_rh_inflated.mat"
+
+
+FREECOG_FILE_ELECS_RECORDING="$FREECOG_DIR_ELECS/clinical_recording_list.csv"
+FREECOG_FILE_ELECS_ALL="$FREECOG_DIR_ELECS/clinical_elecs_all.mat"
+
+function make_subject_paths() {
+	mkdir -p "$FREECOG_DIR_SUBJ"
+	mkdir -p "$FREECOG_DIR_MRI"
+	mkdir -p "$FREECOG_DIR_ORIG"
+	mkdir -p "$FREECOG_DIR_CT"
+	mkdir -p "$FREECOG_DIR_ACPC"
+	mkdir -p "$FREECOG_DIR_DICOM"
+	mkdir -p "$FREECOG_DIR_ELECS"
+	mkdir -p "$FREECOG_DIR_MESHES"
+	mkdir -p "$FREECOG_DIR_GYRI"
+	mkdir -p "$FREECOG_DIR_ASCII"
+	mkdir -p "$FREECOG_DIR_SUBCORT"
+}
+
+function prep_recon() {
+	cp $FREECOG_FILE_T1_ACPC_NII $FREECOG_FILE_T1_ORIG_NII
+	mri_convert $FREECOG_FILE_T1_ORIG_NII $FREECOG_FILE_T1_ORIG_MGZ
+}
+
+function get_recon() {
+	recon-all -subjid $FREECOG_SUBJ -sd $FREECOG_DIR_SUBJ -all -3T -openmp 12 -cw256
+	mkdir -p $FREECOG_DIR_GYRI
+	mri_annotation2label --subject $FREECOG_SUBJ --hemi lh --surface pial --outdir $FREECOG_DIR_GYRI
+	mri_annotation2label --subject $FREECOG_SUBJ --hemi rh --surface pial --outdir $FREECOG_DIR_GYRI
+}
+
+function check_pial() {
+	freeview --volume $FREECOG_FILE_T1_BRAIN_MGZ --surface $FREECOG_FILE_SURF_PIAL_RH --surface $FREECOG_FILE_SURF_PIAL_LH --viewport "coronal"
+}
+
+function convert_fsmesh2mlab() {
+	uv run convert_fsmesh2mlab.py $FREECOG_FILE_SURF_PIAL_LH $FREECOG_FILE_MESH_PIAL_LH $FREECOG_FILE_MESH_STRUCT_PIAL_LH
+	uv run convert_fsmesh2mlab.py $FREECOG_FILE_SURF_PIAL_RH $FREECOG_FILE_MESH_PIAL_RH $FREECOG_FILE_MESH_STRUCT_PIAL_RH
+	uv run convert_fsmesh2mlab.py $FREECOG_FILE_SURF_WHITE_LH $FREECOG_FILE_MESH_WHITE_LH $FREECOG_FILE_MESH_STRUCT_WHITE_LH
+	uv run convert_fsmesh2mlab.py $FREECOG_FILE_SURF_WHITE_RH $FREECOG_FILE_MESH_WHITE_RH $FREECOG_FILE_MESH_STRUCT_WHITE_RH
+	uv run convert_fsmesh2mlab.py $FREECOG_FILE_SURF_INFLATED_LH $FREECOG_FILE_MESH_INFLATED_LH $FREECOG_FILE_MESH_STRUCT_INFLATED_LH
+	uv run convert_fsmesh2mlab.py $FREECOG_FILE_SURF_INFLATED_RH $FREECOG_FILE_MESH_INFLATED_RH $FREECOG_FILE_MESH_STRUCT_INFLATED_RH
+}
+
+function convert_annotation2label() {
+	mri_annotation2label --subject $FREECOG_SUBJ --hemi lh --surface pial --outdir $FREECOG_DIR_GYRI
+	mri_annotation2label --subject $FREECOG_SUBJ --hemi rh --surface pial --outdir $FREECOG_DIR_GYRI
+}
+
+function get_subcort() {
+	#./aseg2srf.sh -s $FREECOG_SUBJ -l "4 5 10 11 12 13 17 18 26 28 43 44 49 50 51 52 53 54 58 60 14 15 16" -d
+	for file in "$FREECOG_DIR_ASCII/"*.srf; do
+		if [ -f "$file" ]; then
+			mv "$file" "${file%.*}.asc"
+		fi
+	done
+	uv run convert_fssubcort2mesh.py $FREECOG_DIR_ASCII $FREECOG_DIR_SUBCORT
+}
+
+function register_ctmr() {
+	uv run register_ctmr.py $FREECOG_FILE_CT_NII $FREECOG_FILE_T1_ORIG_MGZ $FREECOG_FILE_CT_REG_NII
+}
+
+function electrode_picker() {
+	freeview \
+		--volume $FREECOG_FILE_T1_BRAIN_MGZ \
+		--volume $FREECOG_FILE_T1_ASEG_MGZ \
+		--volume $FREECOG_FILE_CT_REG_NII:colormap=heat:opacity=1.0 \
+		--surface $FREECOG_FILE_SURF_WHITE_RH:edgecolor=yellow \
+		--surface $FREECOG_FILE_SURF_WHITE_LH:edgecolor=yellow \
+		--surface $FREECOG_FILE_SURF_PIAL_RH:edgecolor=green \
+		--surface $FREECOG_FILE_SURF_PIAL_LH:edgecolor=green
+}
+
+function gen_elecs_all() {
+	uv run gen_elecs_all.py $FREECOG_FILE_T1_BRAIN_MGZ $FREECOG_DIR_ELECS_INDIVIDUAL $FREECOG_FILE_ELECS_RECORDING $FREECOG_FILE_ELECS_ALL 
+}
+
+
+make_subject_paths
+# --manually copy data into subject paths
+#prep_recon
+#get_recon
+#check_pial
+#convert_fsmesh2mlab
+#convert_annotation2label
+#get_subcort
+#register_ctmr
+#electrode_picker
+gen_elecs_all
