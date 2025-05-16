@@ -21,11 +21,11 @@ FREECOG_DIR_GYRI="$FREECOG_DIR_LABELS/gyri"
 FREECOG_DIR_SUBCORT="$FREECOG_DIR_MESHES/subcort"
 FREECOG_DIR_ELECS_INDIVIDUAL="$FREECOG_DIR_ELECS/individual_elecs"
 
-FREECOG_FILE_T1_ACPC_NII="$FREECOG_DIR_ACPC/T1.nii"
-FREECOG_FILE_T1_ORIG_NII="$FREECOG_DIR_ORIG/T1.nii"
+FREECOG_FILE_T1_ACPC_NII="$FREECOG_DIR_ACPC/T1.nii.gz"
+FREECOG_FILE_T1_ORIG_NII="$FREECOG_DIR_ORIG/T1.nii.gz"
 FREECOG_FILE_T1_ORIG_MGZ="$FREECOG_DIR_ORIG/001.mgz"
 FREECOG_FILE_T1_BRAIN_MGZ="$FREECOG_DIR_MRI/brain.mgz"
-FREECOG_FILE_T1_ORIG_MGZ="$FREECOG_DIR_MRI/orig.mgz"
+#FREECOG_FILE_T1_ORIG_MGZ="$FREECOG_DIR_MRI/orig.mgz"
 FREECOG_FILE_T1_ASEG_MGZ="$FREECOG_DIR_MRI/aparc+aseg.mgz"
 
 FREECOG_FILE_CT_NII="$FREECOG_DIR_CT/CT.nii"
@@ -76,10 +76,10 @@ function prep_recon() {
 }
 
 function get_recon() {
-	recon-all -subjid $FREECOG_SUBJ -sd $FREECOG_DIR_SUBJ -all -3T -openmp 12 -cw256
-	mkdir -p $FREECOG_DIR_GYRI
-	mri_annotation2label --subject $FREECOG_SUBJ --hemi lh --surface pial --outdir $FREECOG_DIR_GYRI
-	mri_annotation2label --subject $FREECOG_SUBJ --hemi rh --surface pial --outdir $FREECOG_DIR_GYRI
+	recon-all -subjid $FREECOG_SUBJ -sd $FREECOG_DIR_SUBJ -all -3T -openmp 1 -cw256
+	#mkdir -p $FREECOG_DIR_GYRI
+	#mri_annotation2label --subject $FREECOG_SUBJ --hemi lh --surface pial --outdir $FREECOG_DIR_GYRI
+	#mri_annotation2label --subject $FREECOG_SUBJ --hemi rh --surface pial --outdir $FREECOG_DIR_GYRI
 }
 
 function check_pial() {
@@ -132,12 +132,13 @@ function gen_elecs_all() {
 
 make_subject_paths
 # --manually copy data into subject paths
+# --Run ACPC correction
 #prep_recon
-#get_recon
+get_recon
 #check_pial
 #convert_fsmesh2mlab
 #convert_annotation2label
 #get_subcort
 #register_ctmr
 #electrode_picker
-gen_elecs_all
+#gen_elecs_all

@@ -7,6 +7,12 @@
 ## Installation Steps
   1. Clone repo from github
 
+## Recons Generation
+  1. Copy T1w NIFTI to the `mri` folder.
+  2. Copy the T1w NIFTI to the `acpc` folder and rename to `T1_orig.nii.gz`.
+  3. Use `freeview` to load `T1_orig.nii.gz` and align the RAS origin (0,0,0) to the ACPC line.
+  4. Save the rotated and transformed image as `T1.nii.gz` in the `acpc` folder.
+
 ## Electrode Marking
   1. Uses freesurfers `freeview` program.
   2. Helpful to add all surfaces and volumes to the scene render.
