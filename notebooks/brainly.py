@@ -63,6 +63,7 @@ def generate_fig(SUBJECT_ID, GEOM, DF_ELECTRODES, node_radius=5):
                             marker=dict(symbol='circle',
                                         size=DF_ELECTRODES['radius'],
                                         color=DF_ELECTRODES['color'],  # SPECIFY COLOR RGB FOR EACH CONTACT,
+                                        line_width=0,
                                         line=None),
                             text=[('<br>').join(['{}: {}'.format(key, row[1].to_dict()[key])
                                                  for key in row[1][['Contact']].to_dict()])

@@ -51,9 +51,11 @@ json_elec_coord2 = np.concatenate(
 
 ##
 json_elec_coord_tkras = ras2tkras.dot(json_elec_coord2.T).T[:, :3]
-print(json_elec_coord_tkras)
+
+##
+
+
+
 
 ##
 sio.savemat(elecsall_file, {"eleclabels": eleclabels, "elecmatrix": json_elec_coord_tkras})
-#mri.header.get_vox2ras_tkr().dot(np.linalg.inv(mri.header.get_vox2ras())).dot([13.78,63.\
-#14,-17.08,1])

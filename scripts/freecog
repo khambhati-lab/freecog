@@ -26,7 +26,8 @@ FREECOG_FILE_T1_ORIG_NII="$FREECOG_DIR_ORIG/T1.nii.gz"
 FREECOG_FILE_T1_ORIG_MGZ="$FREECOG_DIR_ORIG/001.mgz"
 FREECOG_FILE_T1_BRAIN_MGZ="$FREECOG_DIR_MRI/brain.mgz"
 #FREECOG_FILE_T1_ORIG_MGZ="$FREECOG_DIR_MRI/orig.mgz"
-FREECOG_FILE_T1_ASEG_MGZ="$FREECOG_DIR_MRI/aparc+aseg.mgz"
+FREECOG_FILE_T1_ASEG_MGZ="$FREECOG_DIR_MRI/aparc.a2009s+aseg.mgz"
+FREECOG_FILE_LUT="$FREECOG_DIR_FS/FreeSurferColorLUT.txt"
 
 FREECOG_FILE_CT_NII="$FREECOG_DIR_CT/CT.nii"
 FREECOG_FILE_CT_REG_NII="$FREECOG_DIR_CT/rCT.nii"
@@ -77,9 +78,9 @@ function prep_recon() {
 
 function get_recon() {
 	recon-all -subjid $FREECOG_SUBJ -sd $FREECOG_DIR_SUBJ -all -3T -openmp 1 -cw256
-	#mkdir -p $FREECOG_DIR_GYRI
-	#mri_annotation2label --subject $FREECOG_SUBJ --hemi lh --surface pial --outdir $FREECOG_DIR_GYRI
-	#mri_annotation2label --subject $FREECOG_SUBJ --hemi rh --surface pial --outdir $FREECOG_DIR_GYRI
+	mkdir -p $FREECOG_DIR_GYRI
+	mri_annotation2label --subject $FREECOG_SUBJ --hemi lh --surface pial --outdir $FREECOG_DIR_GYRI
+	mri_annotation2label --subject $FREECOG_SUBJ --hemi rh --surface pial --outdir $FREECOG_DIR_GYRI
 }
 
 function check_pial() {
@@ -101,7 +102,7 @@ function convert_annotation2label() {
 }
 
 function get_subcort() {
-	#./aseg2srf.sh -s $FREECOG_SUBJ -l "4 5 10 11 12 13 17 18 26 28 43 44 49 50 51 52 53 54 58 60 14 15 16" -d
+	./aseg2srf.sh -s $FREECOG_SUBJ -l "4 5 10 11 12 13 17 18 26 28 43 44 49 50 51 52 53 54 58 60 14 15 16" -d
 	for file in "$FREECOG_DIR_ASCII/"*.srf; do
 		if [ -f "$file" ]; then
 			mv "$file" "${file%.*}.asc"
@@ -129,16 +130,21 @@ function gen_elecs_all() {
 	uv run gen_elecs_all.py $FREECOG_FILE_T1_BRAIN_MGZ $FREECOG_DIR_ELECS_INDIVIDUAL $FREECOG_FILE_ELECS_RECORDING $FREECOG_FILE_ELECS_ALL 
 }
 
+function convert_elecs2label() {
+	uv run elecs2labels.py $FREECOG_FILE_ELECS_ALL $FREECOG_FILE_T1_ASEG_MGZ $FREECOG_FILE_LUT
+}
+
+
 
 make_subject_paths
 # --manually copy data into subject paths
 # --Run ACPC correction
 #prep_recon
-get_recon
+#get_recon
 #check_pial
 #convert_fsmesh2mlab
 #convert_annotation2label
 #get_subcort
 #register_ctmr
 #electrode_picker
-#gen_elecs_all
+convert_elecs2label
