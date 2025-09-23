@@ -29,6 +29,7 @@ for lead_file in os.listdir(elecsind_dir):
     lead_json = json.load(open(os.path.join(elecsind_dir, lead_file), 'rb'))
 
     for pts in lead_json['points']:
+        print(pts)
         json_elec_name.append(pts["comments"][0]["text"])
         json_elec_coord.append([v for k,v in pts["coordinates"].items()])
 

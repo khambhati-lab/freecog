@@ -22,10 +22,13 @@ FREECOG_DIR_SUBCORT="$FREECOG_DIR_MESHES/subcort"
 FREECOG_DIR_ELECS_INDIVIDUAL="$FREECOG_DIR_ELECS/individual_elecs"
 
 FREECOG_FILE_T1_ACPC_NII="$FREECOG_DIR_ACPC/T1.nii.gz"
+FREECOG_FILE_T2_ACPC_NII="$FREECOG_DIR_ACPC/T2.nii.gz"
 FREECOG_FILE_T1_ORIG_NII="$FREECOG_DIR_ORIG/T1.nii.gz"
+FREECOG_FILE_T2_ORIG_NII="$FREECOG_DIR_ORIG/T2.nii.gz"
 FREECOG_FILE_T1_ORIG_MGZ="$FREECOG_DIR_ORIG/001.mgz"
+FREECOG_FILE_T2_ORIG_MGZ="$FREECOG_DIR_ORIG/T2.mgz"
+
 FREECOG_FILE_T1_BRAIN_MGZ="$FREECOG_DIR_MRI/brain.mgz"
-#FREECOG_FILE_T1_ORIG_MGZ="$FREECOG_DIR_MRI/orig.mgz"
 FREECOG_FILE_T1_ASEG_MGZ="$FREECOG_DIR_MRI/aparc.a2009s+aseg.mgz"
 FREECOG_FILE_LUT="$FREECOG_DIR_FS/FreeSurferColorLUT.txt"
 
@@ -73,11 +76,13 @@ function make_subject_paths() {
 
 function prep_recon() {
 	cp $FREECOG_FILE_T1_ACPC_NII $FREECOG_FILE_T1_ORIG_NII
+	cp $FREECOG_FILE_T2_ACPC_NII $FREECOG_FILE_T2_ORIG_NII
 	mri_convert $FREECOG_FILE_T1_ORIG_NII $FREECOG_FILE_T1_ORIG_MGZ
+	mri_convert $FREECOG_FILE_T2_ORIG_NII $FREECOG_FILE_T2_ORIG_MGZ
 }
 
 function get_recon() {
-	recon-all -subjid $FREECOG_SUBJ -sd $FREECOG_DIR_SUBJ -all -3T -openmp 1 -cw256
+	recon-all -subjid $FREECOG_SUBJ -sd $FREECOG_DIR_SUBJ -T2 $FREECOG_FILE_T2_ORIG_MGZ -T2pial -all -3T -openmp 24 #-cw256
 	mkdir -p $FREECOG_DIR_GYRI
 	mri_annotation2label --subject $FREECOG_SUBJ --hemi lh --surface pial --outdir $FREECOG_DIR_GYRI
 	mri_annotation2label --subject $FREECOG_SUBJ --hemi rh --surface pial --outdir $FREECOG_DIR_GYRI
@@ -140,11 +145,12 @@ make_subject_paths
 # --manually copy data into subject paths
 # --Run ACPC correction
 #prep_recon
-#get_recon
+get_recon
 #check_pial
 #convert_fsmesh2mlab
 #convert_annotation2label
 #get_subcort
 #register_ctmr
 #electrode_picker
-convert_elecs2label
+#gen_elecs_all
+#convert_elecs2label
