@@ -26,8 +26,9 @@ for ii, el in enumerate(elecs_all['anatomy']):
     el_type = el[2][0]
     if el_full_name == "NaN":
         continue
+    coord = elecs_all['elecmatrix'][ii]
 
-    sensors.append((ii, el_full_name, el_abbr_name, el_type, el_s_id))
+    sensors.append((ii, el_full_name, el_abbr_name, el_type, el_s_id, coord[0], coord[1], coord[2]))
 sensors = np.array(sensors)
 
 ## Construct Electrodes and Sensors objects
@@ -61,26 +62,25 @@ for el in np.unique(sensors[:,1]):
         ieeg_sensors.append(
             ieeg.IntracranialEEGSensor(
                 electrode=ieeg_electrodes[-1],
-                id=int(s[-1]),
-                idx=int(s[0])
+                id=int(s[4]),
+                idx=int(s[0]),
+                anatomy=mri.MRIPointAnatomy(ras_surf=s[5:8].astype(float))
             )
         )
+        print(ieeg_sensors[-1])
 
 ## Construct Montage
 ieeg_montage = ieeg.IntracranialEEGMontage(ieeg_sensors, "common_global_reference")
 for ch in ieeg_montage.channels:
-    print(ch.name)
+    print(ch.name, ch.anatomy, ch.anode[0].anatomy, ch.cathode[0].anatomy)
 
 ## Apply Re-Reference Scheme to a Signal
 signal = np.random.randn(elecs_all['anatomy'].shape[0], 1024)
 signal_reref = ieeg_montage.apply_reference(signal)
 
 ## PointAnatomy
-ieeg_anatomy = [mri.MRIPointAnatomy(ras_surf=crd) for crd in elecs_all['elecmatrix']]
 ieeg_parc = mri.MRIAtlas(parc_all)
 
-ieeg_anatomy[0].parcellate_point(ieeg_parc)
-print(ieeg_anatomy[0].parcellation)
-
-ieeg_anatomy[148].parcellate_point(ieeg_parc)
-print(ieeg_anatomy[148].parcellation)
+ieeg_sensors[0].anatomy.parcellate_point(ieeg_parc)
+print(ieeg_sensors[0].anatomy)
+print(ieeg_sensors[0].anatomy.parcellation)
