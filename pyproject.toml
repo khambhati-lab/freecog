@@ -1,8 +1,19 @@
 [project]
 name = "freecog"
 version = "0.1.0"
-description = "Add your description here"
+description = "freecog"
+authors = [{name = "Ankit N. Khambhati", email = "akhambhati@gmail.com"}]
+license = "MIT"
 readme = "README.md"
+homepage = "https://github.com/khambhati-lab/freecog"
+repository = "https://github.com/khambhati-lab/freecog"
+documentation = "https://freecog.readthedocs.io"
+packages = [
+  { include = "freecog", from = "src" },
+]
+classifiers = [
+  "Development Status :: 2 - Alpha",
+]
 requires-python = ">=3.13"
 dependencies = [
     "matplotlib>=3.10.3",
@@ -14,3 +25,7 @@ dependencies = [
     "scipy>=1.15.2",
     "seaborn>=0.13.2",
 ]
+
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"
