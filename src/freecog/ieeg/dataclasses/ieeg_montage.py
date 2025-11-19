@@ -40,13 +40,13 @@ class IntracranialEEGMontage:
             case "referential":
                 for s in self.sensors:
                     channels.append(
-                        IntracranialEEGChannel(anode=[s], cathode=None)
+                        IntracranialEEGChannel(anode=[s], cathode=None, snap_to_anode=True)
                     )
 
             case "common_global_reference":
                 for s in self.sensors:
                     channels.append(
-                        IntracranialEEGChannel(anode=[s], cathode=self.sensors)
+                        IntracranialEEGChannel(anode=[s], cathode=self.sensors, snap_to_anode=True)
                     )
 
             case "common_electrode_reference":
@@ -55,7 +55,7 @@ class IntracranialEEGMontage:
                     el_sensors = [s for s in self.sensors if s.electrode.name == el_name]
                     for s in el_sensors:
                         channels.append(
-                            IntracranialEEGChannel(anode=[s], cathode=el_sensors)
+                            IntracranialEEGChannel(anode=[s], cathode=el_sensors, snap_to_anode=True)
                         )
 
             case "bipolar":
@@ -77,7 +77,8 @@ class IntracranialEEGMontage:
                             channels.append(
                                 IntracranialEEGChannel(
                                     anode=[s for s in el_sensors if s.id == (bp1+1)],
-                                    cathode=[s for s in el_sensors if s.id == (bp2+1)]
+                                    cathode=[s for s in el_sensors if s.id == (bp2+1)],
+                                    snap_to_anode=False
                                 )
                             )
         self.channels = channels

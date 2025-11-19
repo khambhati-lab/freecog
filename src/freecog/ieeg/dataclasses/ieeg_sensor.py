@@ -14,10 +14,12 @@ __email__ = __email__
 # Imports #
 # Standard Libraries #
 from dataclasses import dataclass
+from typing import Optional
 
 # Third-Party Packages #
 # Local Packages #
 from .ieeg_electrode import IntracranialEEGElectrode
+from ...mri import MRIPointAnatomy
 
 # Definitions #
 # Classes #
@@ -26,6 +28,7 @@ class IntracranialEEGSensor:
     electrode: IntracranialEEGElectrode
     id: int   # e.g. Sensor number on the electrode
     idx: int = None     # Data index on a digital acquisition system
+    anatomy: Optional[MRIPointAnatomy] = None
 
     @property
     def name(self) -> str:
