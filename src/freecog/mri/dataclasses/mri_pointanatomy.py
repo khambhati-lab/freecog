@@ -34,14 +34,15 @@ class MRIPointAnatomy:
     def __post_init__(self):
         self.parcellation = {}
     
-    def vox_crs(self, affine) -> tuple[int, int, int]:
+    def vox_crs(self, vox2ras_tkr) -> tuple[int, int, int]:
+        ras2vox_tkr = np.linalg.inv(vox2ras_tkr)
         tmp_coord = list(self.ras_surf) + [1] 
         return tuple(np.dot(
-                np.linalg.inv(affine),
+                ras2vox_tkr,
                 tmp_coord)[:3].astype(int))
 
     def parcellate_point(self, mri_atlas: MRIAtlas):
-        vox_crs = self.vox_crs(mri_atlas.mgz_dat.affine)
+        vox_crs = self.vox_crs(mri_atlas.mgz_dat.header.get_vox2ras_tkr())
 
         self.parcellation[mri_atlas.name] = {}
         for lbl in mri_atlas.label2voxel:
